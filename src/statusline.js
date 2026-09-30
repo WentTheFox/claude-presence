@@ -51,6 +51,7 @@ async function main() {
       }
 
       bridge.write(sessionId, bridgeData);
+      bridge.ensureDaemon(sessionId, input.cwd || input.workspace?.current_dir); // [patch]
     }
   } catch {
     // Don't let bridge errors break the statusline
