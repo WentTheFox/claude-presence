@@ -11,11 +11,35 @@ Discord Rich Presence for [Claude Code](https://claude.ai/code) CLI. Automatical
 **Works out of the box.** No Discord bot setup required - the app comes pre-configured with a shared Discord Application so you can start immediately.
 
 ```bash
-npm install -g github:backyarddd/claude-presence
+npm install -g github:WentTheFox/claude-presence
 claude-presence setup
 ```
 
-> **Install from GitHub, not from the npm name.** The `claude-presence` name on npm belongs to an unrelated package by a different author. Installing from GitHub requires `git` on your PATH.
+> **Install from GitHub, not from the npm name.** The `claude-presence` name on npm belongs to an unrelated package by a different author. Installing from GitHub requires `git` on your PATH. This is a fork of [backyarddd/claude-presence](https://github.com/backyarddd/claude-presence), so make sure you use the `WentTheFox` path above.
+
+### Install locally (without GitHub)
+
+If you'd rather not install from GitHub, get the source onto your machine some other way (a clone, a downloaded archive, a copy from a USB stick) and install from that folder. No `git` is needed at install time, only Node.js and npm (which fetches the one dependency from the npm registry).
+
+**Option 1: packed tarball (recommended).** Installs a self-contained copy, so you can delete the source folder afterwards:
+
+```bash
+cd claude-presence
+npm pack                                   # creates claude-presence-<version>.tgz
+npm install -g ./claude-presence-*.tgz
+claude-presence setup
+```
+
+**Option 2: link the folder.** Good for hacking on the code, since edits apply immediately. The hooks point into this folder, so don't move or delete it:
+
+```bash
+cd claude-presence
+npm install        # or: pnpm install
+npm link
+claude-presence setup
+```
+
+To update a local install, pull or copy in the new source, repeat the same steps, and re-run `claude-presence setup` (see [Updating](#updating)).
 
 That's it. Start a **new** Claude Code session and your Discord profile will show your Claude Code session.
 
@@ -128,7 +152,7 @@ If you want to customize the app name, images, or run your own Discord Applicati
 1. Go to the [Discord Developer Portal](https://discord.com/developers/applications)
 2. Click **New Application** and name it whatever you want (this shows on your Discord profile)
 3. Copy the **Application ID**
-4. Go to **Rich Presence** > **Art Assets** and upload these images. They are not shipped with the install, so download them from the [`assets/` folder in this repo](https://github.com/backyarddd/claude-presence/tree/main/assets):
+4. Go to **Rich Presence** > **Art Assets** and upload these images. They are not shipped with the install, so download them from the [`assets/` folder in this repo](https://github.com/WentTheFox/claude-presence/tree/main/assets) (or from your local copy):
 
 | Asset Name (exact) | File | Description |
 |-----------|------|-------------|
@@ -154,9 +178,11 @@ This overrides the built-in default. The daemon reads it at session start, so op
 ## Updating
 
 ```bash
-npm install -g github:backyarddd/claude-presence
+npm install -g github:WentTheFox/claude-presence
 claude-presence setup
 ```
+
+For a [local install](#install-locally-without-github), rebuild the tarball (or re-link) from the updated source instead, then run `setup`.
 
 Run `setup` after every update. Hook commands contain the absolute path of the installed package, and `setup` rewrites any existing claude-presence hook to point at the current install - so a reinstall, a changed npm prefix, or a Node version switch is repaired by re-running it. Your own hooks in the same events are never touched.
 
@@ -203,19 +229,19 @@ claude-presence uninstall # force cleanup
 **Hooks broke after switching Node versions (nvm, fnm, volta):**
 Each Node version has its own global folder, so the installed package moved. Reinstall on the new version and re-run `setup` - it repoints the hooks:
 ```bash
-npm install -g github:backyarddd/claude-presence
+npm install -g github:WentTheFox/claude-presence   # or reinstall from your local copy
 claude-presence setup
 ```
 
 ## Requirements
 
 - Node.js >= 18
-- `git` (npm installs this package from GitHub)
+- `git` (only if installing from GitHub; not needed for a [local install](#install-locally-without-github))
 - Discord desktop app
 - Claude Code CLI
 
 ## License
 
-MIT, see [LICENSE](LICENSE). Copyright (c) 2026 backyarddd.
+MIT, see [LICENSE](LICENSE). Copyright (c) 2026 backyarddd. This fork is maintained by [WentTheFox](https://github.com/WentTheFox).
 
 Status icons from [Heroicons](https://heroicons.com) (MIT License).

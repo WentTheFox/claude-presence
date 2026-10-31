@@ -18,7 +18,10 @@
     "coding",
     "cli"
   ],
-  "author": "",
+  "author": "backyarddd (https://github.com/backyarddd)",
+  "contributors": [
+    "WentTheFox (https://github.com/WentTheFox)"
+  ],
   "license": "MIT",
   "type": "commonjs",
   "engines": {
@@ -31,12 +34,12 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/backyarddd/claude-presence.git"
+    "url": "git+https://github.com/WentTheFox/claude-presence.git"
   },
   "bugs": {
-    "url": "https://github.com/backyarddd/claude-presence/issues"
+    "url": "https://github.com/WentTheFox/claude-presence/issues"
   },
-  "homepage": "https://github.com/backyarddd/claude-presence#readme",
+  "homepage": "https://github.com/WentTheFox/claude-presence#readme",
   "dependencies": {
     "@xhayper/discord-rpc": "^1.3.1"
   }
