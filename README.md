@@ -187,7 +187,8 @@ Restores your original Claude Code settings exactly as they were. Only claude-pr
 ## Development
 
 ```bash
-npm test    # node:test suite covering pricing resolution and settings.json rewriting
+pnpm install
+pnpm test    # node:test suite covering pricing resolution and settings.json rewriting
 ```
 
 ## Troubleshooting
