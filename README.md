@@ -25,7 +25,8 @@ That's it. Start a **new** Claude Code session and your Discord profile will sho
 
 | Field | Example |
 |-------|---------|
-| **Details** | `Using Claude Code` (project and branch are never shown) |
+| **Details** | `Working on my-app` (git project name, never the branch; `Using Claude Code` if hidden by the [blocklist](#hiding-projects)) |
+| **Button** | `View Repository`, only when the `origin` remote is a **public** GitHub repo and the path isn't blocklisted |
 | **Model** | `Opus 5 (1M context)`, `Sonnet 5`, `Haiku 4.5` |
 | **Tokens** | `29.5k tokens` |
 | **Elapsed** | `01:23:45 elapsed` |
@@ -51,10 +52,25 @@ The model line is Claude Code's own display name, so it tracks whatever you have
 | Anything else | `Using <ToolName>` |
 | Turn finished, or 2 min of silence | `Waiting for input` |
 
+### Hiding Projects
+
+Create `~/.claude/claude-presence-blocklist` (or `$CLAUDE_CONFIG_DIR/claude-presence-blocklist`). It sits outside the repo, so it is never committed, and setup/uninstall leave it alone. One glob per line, `#` for comments:
+
+```
+# hide everything under these
+~/git/private
+~/work/*/internal
+**/client-*
+```
+
+`*` matches within one path segment, `**` across segments, `?` one character, and `~` is your home directory. A pattern also covers everything below a matching directory. Both the working directory and the git root are checked. A hidden session shows `Using Claude Code` instead. Hidden projects never get a `View Repository` button either. Changes apply on the next presence update, no restart needed.
+
+**Repository button:** public status is checked with one unauthenticated request to `github.com` (cached for an hour, 10 minutes if not public). Private repos, other hosts, and any failure show no button.
+
 ### Multi-Session Support
 
 Running multiple Claude Code instances? The presence automatically:
-- Shows the count: `Using Claude Code [3 sessions]`
+- Shows the count: `Working on my-app [3 sessions]`
 - Aggregates total tokens across all sessions
 - Displays the most recently active session's details
 - Shows per-session token breakdown on hover

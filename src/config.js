@@ -10,6 +10,8 @@ const CLAUDE_CONFIG_DIR = process.env.CLAUDE_CONFIG_DIR || path.join(os.homedir(
 const SETTINGS_PATH = path.join(CLAUDE_CONFIG_DIR, 'settings.json');
 const PRESENCE_CONFIG_PATH = path.join(CLAUDE_CONFIG_DIR, 'claude-presence.json');
 
+const BLOCKLIST_PATH = path.join(CLAUDE_CONFIG_DIR, 'claude-presence-blocklist');
+
 const IMAGE_KEYS = {
   large: 'claude-logo',
   coding: 'status-coding',
@@ -66,6 +68,20 @@ function getPresenceConfig() {
   }
 }
 
+// User-owned list of path globs (one per line, '#' comments) whose project name is never
+// shown. Lives in the Claude config dir, outside any repo, and is never written or deleted
+// by setup/uninstall.
+function getBlocklist() {
+  try {
+    return fs.readFileSync(BLOCKLIST_PATH, 'utf8')
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter((line) => line && !line.startsWith('#'));
+  } catch {
+    return [];
+  }
+}
+
 function savePresenceConfig(config) {
   fs.writeFileSync(PRESENCE_CONFIG_PATH, JSON.stringify(config, null, 2));
 }
@@ -81,6 +97,7 @@ module.exports = {
   CLAUDE_CONFIG_DIR,
   SETTINGS_PATH,
   PRESENCE_CONFIG_PATH,
+  BLOCKLIST_PATH,
   IMAGE_KEYS,
   PACKAGE_ROOT,
   isOwnedCommand,
@@ -92,6 +109,7 @@ module.exports = {
   bridgePath,
   pidPath,
   getPresenceConfig,
+  getBlocklist,
   savePresenceConfig,
   getOriginalStatusline,
 };

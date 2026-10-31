@@ -4,6 +4,8 @@ const path = require('path');
 const config = require('./config');
 const bridge = require('./bridge');
 const DiscordPresence = require('./discord');
+const { isBlocked } = require('./blocklist');
+const repo = require('./repo');
 
 const sessionId = process.argv[2];
 if (!sessionId) {
@@ -83,12 +85,31 @@ function aggregateSessions() {
   };
 }
 
-function buildPresence(aggregated) {
+// Project name to show, or null when absent or hidden by the user's blocklist file.
+// Read per render so edits to the config apply without restarting sessions.
+function visibleProject(session) {
+  const ws = session.workspace;
+  if (!ws || !ws.project) return null;
+  if (isBlocked([ws.dir, ws.root], config.getBlocklist())) return null;
+  return ws.project;
+}
+
+// GitHub URL for the primary session's repo, only if its project is visible and the repo is public.
+async function publicRepoUrl(session) {
+  if (!visibleProject(session)) return null;
+  const url = session.workspace.remote;
+  if (!url || !(await repo.isPublic(url))) return null;
+  return url;
+}
+
+function buildPresence(aggregated, repoUrl) {
   if (!aggregated) return null;
 
   const { primary, sessionCount, totals } = aggregated;
-  // Details line: fixed text instead of project/branch so the public profile doesn't reveal what's being worked on
-  const details = sessionCount > 1 ? `Using Claude Code [${sessionCount} sessions]` : 'Using Claude Code';
+  // Details line: git project name (never the branch), unless the session's path is blocklisted
+  const project = visibleProject(primary);
+  const base = project ? `Working on ${project}` : 'Using Claude Code';
+  const details = sessionCount > 1 ? `${base} [${sessionCount} sessions]` : base;
 
   // State line: aggregated tokens, model
   const tokens = formatTokens(totals.tokens_total);
@@ -104,8 +125,10 @@ function buildPresence(aggregated) {
       : (primary.version ? `Claude Code v${primary.version}` : 'Claude Code'),
     smallImageKey: activityToImageKey(primary.activity?.status),
     smallImageText: activityToSmallText(primary.activity).slice(0, 128),
-    buttons: [{ label: 'Claude Code', url: 'https://claude.ai/code' }],
   };
+
+  // Discord rejects an empty buttons array, so only set it when there is a public repo
+  if (repoUrl) presence.buttons = [{ label: 'View Repository', url: repoUrl }];
 
   // Elapsed timer from earliest session start
   const startTime = totals.earliest_start;
@@ -149,7 +172,7 @@ async function onBridgeChange() {
 
   // Aggregate all sessions and build presence
   const aggregated = aggregateSessions();
-  const presence = buildPresence(aggregated);
+  const presence = buildPresence(aggregated, aggregated && await publicRepoUrl(aggregated.primary));
   if (presence) {
     await discord.setActivity(presence);
   }

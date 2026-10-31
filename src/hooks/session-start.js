@@ -27,6 +27,8 @@ async function main() {
     // Detect project name and git branch
     let project = path.basename(cwd);
     let branch = null;
+    let root = null;
+    let remote = null;
 
     // Try to get git repo name and branch
     try {
@@ -46,6 +48,16 @@ async function main() {
         stdio: ['pipe', 'pipe', 'pipe'],
         windowsHide: true,
       }).trim();
+      root = repoRoot;
+      try {
+        remote = require('../repo').githubUrl(execSync('git remote get-url origin', {
+          cwd,
+          timeout: 2000,
+          encoding: 'utf8',
+          stdio: ['pipe', 'pipe', 'pipe'],
+          windowsHide: true,
+        }));
+      } catch {}
       project = path.basename(repoRoot);
     } catch {}
 
@@ -61,7 +73,7 @@ async function main() {
       session_id: sessionId,
       session_start: Date.now(),
       timestamp: Math.floor(Date.now() / 1000),
-      workspace: { project, branch, dir: cwd },
+      workspace: { project, branch, dir: cwd, root, remote },
       activity: {
         status: 'idle',
         detail: 'Starting session',
