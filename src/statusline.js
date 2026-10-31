@@ -50,20 +50,6 @@ async function main() {
         bridgeData.context_remaining_pct = input.context_window.remaining_percentage;
       }
 
-      // Cost - use Claude Code's value if available, otherwise calculate from tokens.
-      // Always write both keys: bridge.write merges, so leaving them out would keep a
-      // previous render's cost after a /clear resets the context window.
-      if (input.cost && input.cost.total_cost_usd != null) {
-        bridgeData.cost_usd = input.cost.total_cost_usd;
-        bridgeData.cost_estimated = false;
-      } else if (tokensIn || tokensOut) {
-        bridgeData.cost_usd = config.calculateCost(modelId, tokensIn, tokensOut);
-        bridgeData.cost_estimated = true;
-      } else {
-        bridgeData.cost_usd = 0;
-        bridgeData.cost_estimated = false;
-      }
-
       bridge.write(sessionId, bridgeData);
     }
   } catch {

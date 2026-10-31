@@ -61,15 +61,11 @@ function aggregateSessions() {
   // Aggregate totals across all sessions
   let totalTokensIn = 0;
   let totalTokensOut = 0;
-  let totalCost = 0;
-  let costEstimated = false;
   let earliestStart = Infinity;
 
   for (const session of allSessions) {
     totalTokensIn += session.tokens?.in || 0;
     totalTokensOut += session.tokens?.out || 0;
-    totalCost += session.cost_usd || 0;
-    if (session.cost_estimated) costEstimated = true;
 
     const start = session.session_start || Infinity;
     if (start < earliestStart) earliestStart = start;
@@ -82,8 +78,6 @@ function aggregateSessions() {
       tokens_in: totalTokensIn,
       tokens_out: totalTokensOut,
       tokens_total: totalTokensIn + totalTokensOut,
-      cost_usd: totalCost,
-      cost_estimated: costEstimated,
       earliest_start: earliestStart === Infinity ? null : earliestStart,
     },
   };
@@ -96,11 +90,10 @@ function buildPresence(aggregated) {
   // Details line: fixed text instead of project/branch so the public profile doesn't reveal what's being worked on
   const details = sessionCount > 1 ? `Using Claude Code [${sessionCount} sessions]` : 'Using Claude Code';
 
-  // State line: aggregated cost, tokens, model
-  const cost = `${totals.cost_estimated ? '~' : ''}$${totals.cost_usd.toFixed(2)}`;
+  // State line: aggregated tokens, model
   const tokens = formatTokens(totals.tokens_total);
   const model = primary.model || 'Claude';
-  const state = `${cost} | ${tokens} tokens | ${model}`;
+  const state = `${tokens} tokens | ${model}`;
 
   const presence = {
     details: details.slice(0, 128),

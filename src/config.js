@@ -17,73 +17,6 @@ const IMAGE_KEYS = {
   idle: 'status-idle',
 };
 
-// Claude API list pricing, USD per 1M tokens.
-// Source: https://platform.claude.com/docs/en/about-claude/pricing (checked 2026-09-01)
-// The 1M-token context window is billed at these standard rates - there is no
-// long-context premium. Cache writes (1.25x/2x) and cache reads (0.1x, 0.025x on
-// Fable/Mythos 5.1) are not modelled: Claude Code's statusline reports only total
-// input and output tokens, so a calculated cost is an upper bound.
-const MODEL_PRICING = {
-  'claude-fable-5-1':          { input: 10.00, output: 50.00 },
-  'claude-mythos-5-1':         { input: 10.00, output: 50.00 },
-  'claude-fable-5':            { input: 10.00, output: 50.00 },
-  'claude-mythos-5':           { input: 10.00, output: 50.00 },
-  'claude-opus-5':             { input:  5.00, output: 25.00 },
-  'claude-opus-4-8':           { input:  5.00, output: 25.00 },
-  'claude-opus-4-7':           { input:  5.00, output: 25.00 },
-  'claude-opus-4-6':           { input:  5.00, output: 25.00 },
-  'claude-opus-4-5':           { input:  5.00, output: 25.00 },
-  'claude-opus-4-1':           { input: 15.00, output: 75.00 },
-  'claude-opus-4-0':           { input: 15.00, output: 75.00 },
-  'claude-opus-4-20250514':    { input: 15.00, output: 75.00 },
-  'claude-sonnet-5':           { input:  2.00, output: 10.00 },
-  'claude-sonnet-4-6':         { input:  3.00, output: 15.00 },
-  'claude-sonnet-4-5':         { input:  3.00, output: 15.00 },
-  'claude-sonnet-4-0':         { input:  3.00, output: 15.00 },
-  'claude-sonnet-4-20250514':  { input:  3.00, output: 15.00 },
-  'claude-haiku-4-5':          { input:  1.00, output:  5.00 },
-};
-
-// Unknown ids are most often a model newer than this table; Claude Code defaults to
-// the Opus tier, so price them there rather than silently under-reporting.
-const DEFAULT_PRICING = { input: 5.00, output: 25.00 };
-
-function escapeRegExp(value) {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
-// Claude Code appends a context-tier suffix to the model id ("claude-opus-5[1m]").
-function normalizeModelId(modelId) {
-  if (typeof modelId !== 'string') return '';
-  return modelId.trim().toLowerCase().replace(/\[[^\]]*\]/g, '');
-}
-
-// Matches exact ids first, then the longest known alias contained in the id, so dated
-// snapshots ("claude-haiku-4-5-20251001") and platform prefixes ("anthropic.claude-opus-5")
-// still resolve.
-function resolvePricing(modelId) {
-  const id = normalizeModelId(modelId);
-  if (!id) return DEFAULT_PRICING;
-
-  if (MODEL_PRICING[id]) return MODEL_PRICING[id];
-
-  let bestAlias = null;
-  for (const alias of Object.keys(MODEL_PRICING)) {
-    // A trailing digit means a different model ("claude-opus-4-10" is not "claude-opus-4-1");
-    // a trailing dash is a dated snapshot and still resolves.
-    if (!new RegExp(escapeRegExp(alias) + '(?![0-9])').test(id)) continue;
-    if (!bestAlias || alias.length > bestAlias.length) bestAlias = alias;
-  }
-  return bestAlias ? MODEL_PRICING[bestAlias] : DEFAULT_PRICING;
-}
-
-function calculateCost(modelId, inputTokens, outputTokens) {
-  const pricing = resolvePricing(modelId);
-  const inputCost = ((inputTokens || 0) / 1_000_000) * pricing.input;
-  const outputCost = ((outputTokens || 0) / 1_000_000) * pricing.output;
-  return inputCost + outputCost;
-}
-
 const PACKAGE_ROOT = path.resolve(__dirname, '..');
 
 // Scripts this package installs into settings.json.
@@ -161,9 +94,4 @@ module.exports = {
   getPresenceConfig,
   savePresenceConfig,
   getOriginalStatusline,
-  MODEL_PRICING,
-  DEFAULT_PRICING,
-  normalizeModelId,
-  resolvePricing,
-  calculateCost,
 };

@@ -28,7 +28,6 @@ That's it. Start a **new** Claude Code session and your Discord profile will sho
 | **Details** | `Using Claude Code` (project and branch are never shown) |
 | **Model** | `Opus 5 (1M context)`, `Sonnet 5`, `Haiku 4.5` |
 | **Tokens** | `29.5k tokens` |
-| **Cost** | `$0.70` (or `~$0.70` when estimated - see [Cost](#cost)) |
 | **Elapsed** | `01:23:45 elapsed` |
 | **Activity** | `Editing app.tsx`, `Running terminal command`, `Searching codebase` |
 | **Status icon** | Coding / Thinking / Idle |
@@ -56,38 +55,9 @@ The model line is Claude Code's own display name, so it tracks whatever you have
 
 Running multiple Claude Code instances? The presence automatically:
 - Shows the count: `Using Claude Code [3 sessions]`
-- Aggregates total tokens and cost across all sessions
+- Aggregates total tokens across all sessions
 - Displays the most recently active session's details
 - Shows per-session token breakdown on hover
-
-## Cost
-
-Claude Code reports the session's actual cost in the statusline payload, and that number is used whenever it is present. Only when it is missing does claude-presence estimate the cost from token counts and the pricing table below - an estimate is prefixed with `~` on Discord and labelled `(estimated from tokens)` in `claude-presence status`.
-
-Claude API list pricing, USD per million tokens ([source](https://platform.claude.com/docs/en/about-claude/pricing), checked 2026-09-01):
-
-| Model | Model ID | Input | Output |
-|-------|----------|-------|--------|
-| Claude Fable 5.1 | `claude-fable-5-1` | $10.00 | $50.00 |
-| Claude Fable 5 | `claude-fable-5` | $10.00 | $50.00 |
-| Claude Opus 5 | `claude-opus-5` | $5.00 | $25.00 |
-| Claude Opus 4.8 | `claude-opus-4-8` | $5.00 | $25.00 |
-| Claude Opus 4.7 | `claude-opus-4-7` | $5.00 | $25.00 |
-| Claude Opus 4.6 | `claude-opus-4-6` | $5.00 | $25.00 |
-| Claude Opus 4.5 | `claude-opus-4-5` | $5.00 | $25.00 |
-| Claude Sonnet 5 | `claude-sonnet-5` | $2.00 | $10.00 |
-| Claude Sonnet 4.6 | `claude-sonnet-4-6` | $3.00 | $15.00 |
-| Claude Sonnet 4.5 | `claude-sonnet-4-5` | $3.00 | $15.00 |
-| Claude Haiku 4.5 | `claude-haiku-4-5` | $1.00 | $5.00 |
-
-Deprecated models still served on Bedrock and Google Cloud are also in the table (Opus 4.1 and Opus 4 at $15/$75, Sonnet 4 at $3/$15), as are `claude-mythos-5-1` and `claude-mythos-5`, which price the same as their Fable counterparts. An unrecognised model id falls back to Opus-tier pricing, since an unknown id is usually a model newer than this table.
-
-Notes on how the estimate is derived:
-
-- **Model ids are normalised before lookup.** Claude Code reports ids like `claude-opus-5[1m]`; the context-tier suffix is stripped, and dated snapshots (`claude-haiku-4-5-20251001`) and platform prefixes (`anthropic.claude-opus-5`) resolve to the right entry.
-- **The 1M-token context window is billed at standard rates.** There is no long-context premium to model.
-- **Prompt caching is not modelled.** The statusline reports only total input and output tokens, with no cache breakdown. Cache reads bill at 0.1x the input rate (0.025x on Fable 5.1), so a real session with a warm cache costs meaningfully less than the estimate. Treat an estimate as an upper bound.
-- **Fast mode is not modelled.** `/fast` bills Opus 5 and Opus 4.8 at $10/$50, and the statusline does not report the speed setting - so an estimate for a fast-mode session is low. Claude Code's own reported cost, which is used whenever available, has this right.
 
 ## Commands
 
@@ -107,7 +77,7 @@ claude-presence uses Claude Code's [hook system](https://docs.anthropic.com/en/d
 Claude Code
   |
   |-- SessionStart -----> Spawns background daemon
-  |-- StatusLine -------> Captures tokens, cost, model
+  |-- StatusLine -------> Captures tokens, model
   |-- PostToolUse ------> Tracks activity (editing, searching, etc.)
   |-- Stop -------------> Detects idle state
   |-- SessionEnd -------> Kills daemon, cleans up
@@ -130,7 +100,6 @@ Hook commands embed the absolute path of the installed package, which is why `se
 - **Non-destructive** - your own hooks in the same events are left untouched
 - **StatusLine chaining** - preserves your existing statusline
 - **Multi-session aggregation** - tracks all concurrent instances
-- **Cost from Claude Code**, with a token-based estimate as fallback
 - **Graceful degradation** - if Discord isn't running, no errors
 - **Auto-reconnect** - daemon reconnects if Discord restarts
 - **Orphan protection** - daemon self-terminates if session dies
@@ -188,7 +157,7 @@ Restores your original Claude Code settings exactly as they were. Only claude-pr
 
 ```bash
 pnpm install
-pnpm test    # node:test suite covering pricing resolution and settings.json rewriting
+pnpm test    # node:test suite covering settings.json rewriting
 ```
 
 ## Troubleshooting
