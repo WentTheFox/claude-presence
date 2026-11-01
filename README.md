@@ -11,22 +11,22 @@ Discord Rich Presence for [Claude Code](https://claude.ai/code) CLI. Automatical
 **Works out of the box.** No Discord bot setup required - the app comes pre-configured with a shared Discord Application so you can start immediately.
 
 ```bash
-npm install -g github:WentTheFox/claude-presence
+pnpm install -g github:WentTheFox/claude-presence
 claude-presence setup
 ```
 
-> **Install from GitHub, not from the npm name.** The `claude-presence` name on npm belongs to an unrelated package by a different author. Installing from GitHub requires `git` on your PATH. This is a fork of [backyarddd/claude-presence](https://github.com/backyarddd/claude-presence), so make sure you use the `WentTheFox` path above.
+> **Install from GitHub, not from the pnpm name.** The `claude-presence` name on pnpm belongs to an unrelated package by a different author. Installing from GitHub requires `git` on your PATH. This is a fork of [backyarddd/claude-presence](https://github.com/backyarddd/claude-presence), so make sure you use the `WentTheFox` path above.
 
 ### Install locally (without GitHub)
 
-If you'd rather not install from GitHub, get the source onto your machine some other way (a clone, a downloaded archive, a copy from a USB stick) and install from that folder. No `git` is needed at install time, only Node.js and npm (which fetches the one dependency from the npm registry).
+If you'd rather not install from GitHub, get the source onto your machine some other way (a clone, a downloaded archive, a copy from a USB stick) and install from that folder. No `git` is needed at install time, only Node.js and pnpm (which fetches the one dependency from the pnpm registry).
 
 **Option 1: packed tarball (recommended).** Installs a self-contained copy, so you can delete the source folder afterwards:
 
 ```bash
 cd claude-presence
-npm pack                                   # creates claude-presence-<version>.tgz
-npm install -g ./claude-presence-*.tgz
+pnpm pack                                   # creates claude-presence-<version>.tgz
+pnpm install -g ./claude-presence-*.tgz
 claude-presence setup
 ```
 
@@ -34,8 +34,8 @@ claude-presence setup
 
 ```bash
 cd claude-presence
-npm install        # or: pnpm install
-npm link
+pnpm install        # or: pnpm install
+pnpm link
 claude-presence setup
 ```
 
@@ -135,7 +135,7 @@ Hook commands embed the absolute path of the installed package, which is why `se
 
 ## Features
 
-- **Zero config** - works immediately after `npm install -g` and `setup`
+- **Zero config** - works immediately after `pnpm install -g` and `setup`
 - **Pre-configured Discord app** - no bot creation needed
 - **Non-destructive** - your own hooks in the same events are left untouched
 - **StatusLine chaining** - preserves your existing statusline
@@ -178,19 +178,19 @@ This overrides the built-in default. The daemon reads it at session start, so op
 ## Updating
 
 ```bash
-npm install -g github:WentTheFox/claude-presence
+pnpm install -g github:WentTheFox/claude-presence
 claude-presence setup
 ```
 
 For a [local install](#install-locally-without-github), rebuild the tarball (or re-link) from the updated source instead, then run `setup`.
 
-Run `setup` after every update. Hook commands contain the absolute path of the installed package, and `setup` rewrites any existing claude-presence hook to point at the current install - so a reinstall, a changed npm prefix, or a Node version switch is repaired by re-running it. Your own hooks in the same events are never touched.
+Run `setup` after every update. Hook commands contain the absolute path of the installed package, and `setup` rewrites any existing claude-presence hook to point at the current install - so a reinstall, a changed pnpm prefix, or a Node version switch is repaired by re-running it. Your own hooks in the same events are never touched.
 
 ## Uninstall
 
 ```bash
 claude-presence uninstall   # remove hooks first, while the CLI still exists
-npm uninstall -g claude-presence
+pnpm uninstall -g claude-presence
 ```
 
 Restores your original Claude Code settings exactly as they were. Only claude-presence's own hooks are removed - hooks of yours that share an event, or even the same hook entry, are left in place. Run `uninstall` **before** removing the package - the hook paths point at the installed files, so uninstalling the package first leaves dead hooks in `settings.json`.
@@ -223,13 +223,13 @@ claude-presence uninstall # force cleanup
 ```
 
 **`claude-presence: command not found`:**
-- npm's global bin directory is not on your PATH. Run `npm prefix -g` - that directory (or its `bin` subfolder on macOS/Linux) must be on your PATH.
-- An older copy linked with `npm link` can shadow the global install. Check with `which -a claude-presence` (`where claude-presence` on Windows) and remove the stale one.
+- pnpm's global bin directory is not on your PATH. Run `pnpm prefix -g` - that directory (or its `bin` subfolder on macOS/Linux) must be on your PATH.
+- An older copy linked with `pnpm link` can shadow the global install. Check with `which -a claude-presence` (`where claude-presence` on Windows) and remove the stale one.
 
 **Hooks broke after switching Node versions (nvm, fnm, volta):**
 Each Node version has its own global folder, so the installed package moved. Reinstall on the new version and re-run `setup` - it repoints the hooks:
 ```bash
-npm install -g github:WentTheFox/claude-presence   # or reinstall from your local copy
+pnpm install -g github:WentTheFox/claude-presence   # or reinstall from your local copy
 claude-presence setup
 ```
 
