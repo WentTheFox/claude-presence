@@ -63,8 +63,22 @@ function activityToSmallText(activity) {
   }
 }
 
+// A session is stale when it has had no activity for longer than the orphan timeout
+// and its daemon is gone (e.g. Claude Code crashed before SessionEnd ran).
+function isStale(session) {
+  const last = session.activity?.updated_at || session.timestamp || 0;
+  if (Date.now() - last * 1000 < config.ORPHAN_TIMEOUT_MS) return false;
+  return !bridge.isAlive(bridge.readPid(session.session_id));
+}
+
 function aggregateSessions() {
-  const allSessions = bridge.readAllSessions();
+  const allSessions = bridge.readAllSessions().filter((s) => {
+    if (s.session_id !== sessionId && isStale(s)) {
+      bridge.remove(s.session_id);
+      return false;
+    }
+    return true;
+  });
   if (allSessions.length === 0) return null;
 
   // Find the most recently active session (by activity.updated_at or timestamp)
