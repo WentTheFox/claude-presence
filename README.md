@@ -35,7 +35,7 @@ claude-presence setup
 ```bash
 cd claude-presence
 pnpm install        # or: pnpm install
-pnpm link
+pnpm link . -g
 claude-presence setup
 ```
 
